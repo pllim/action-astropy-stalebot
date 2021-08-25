@@ -1,0 +1,7 @@
+name: 'Astropy stalebot'
+description: 'Handle stale issues and PRs for Astropy.'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+  - 'none'
