@@ -132,7 +132,7 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
     last_committed = None
     last_committed_sec = 0
     for commit in pr.get_commits():
-        cur_commit_time = dateutil.parser.parse(commit.last_modified)
+        cur_commit_time = dateutil.parser.parse(commit.raw_data['commit']['committer']['date'])
         cur_commit_time_sec = cur_commit_time.timestamp()
         if cur_commit_time_sec > last_committed_sec:
             last_committed = cur_commit_time
