@@ -28,7 +28,7 @@ Options that are configurable via `env`:
 | env | Default | Description |
 | --- | --- | --- |
 | `STALEBOT_DRYRUN` | 0 | Set to 1 for dry-run |
-| `STALEBOT_SLEEP` | 0 | Number of seconds to sleep between each issue and PR. This is not needed unless you get trip GitHub spam detector. |
+| `STALEBOT_SLEEP` | 0 | Number of seconds to sleep between each issue and PR. This is not needed unless you trip GitHub spam detector. |
 | `STALEBOT_MAX_ISSUES` | 50 | Number of issues marked as stale to process each run. Set to -1 to skip this check. |
 | `STALEBOT_MAX_PRS` | 200 | Number of PRs marked as stale to process each run. Set to -1 to skip this check. |
 | `STALEBOT_CLOSED_BY_BOT_LABEL` | closed-by-bot | Label bot will apply when closing issues and PRs. |
