@@ -247,7 +247,7 @@ def process_pull_requests(repository, warn_seconds, close_seconds,
         Label the bot will apply when closing a stale PR.
 
     max_prs : int
-        Maximum number of PRs to process.
+        Maximum number of PRs to process. This is skipped if set to a negative number.
 
     sleep : float
         Number of seconds to sleep between PRs. Ignored for dry-run.
@@ -262,7 +262,7 @@ def process_pull_requests(repository, warn_seconds, close_seconds,
     repo = g.get_repo(repository)
 
     for pr in repo.get_pulls(state='open'):
-        if i >= max_prs:
+        if max_prs >= 0 and i >= max_prs:
             break
         process_one_pr(pr, now, warn_seconds, close_seconds,
                        stale_label=stale_label, keep_open_label=keep_open_label,

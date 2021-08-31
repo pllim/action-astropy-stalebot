@@ -219,7 +219,7 @@ def process_issues(repository, warn_seconds, close_seconds,
         Label the bot will apply when closing a stale issue.
 
     max_issues : int
-        Maximum number of issues to process.
+        Maximum number of issues to process. This is skipped if set to a negative number.
 
     sleep : float
         Number of seconds to sleep between issues. Ignored for dry-run.
@@ -235,7 +235,7 @@ def process_issues(repository, warn_seconds, close_seconds,
 
     # Get issues labeled as stale.
     for issue in repo.get_issues(state='open', labels=[stale_label]):
-        if i >= max_issues:
+        if max_issues >= 0 and i >= max_issues:
             break
         process_one_issue(issue, now, warn_seconds, close_seconds,
                           stale_label=stale_label, keep_open_label=keep_open_label,
