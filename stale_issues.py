@@ -30,10 +30,10 @@ max_issues = int(os.environ.get('STALEBOT_MAX_ISSUES', '50'))
 sleep = float(os.environ.get('STALEBOT_SLEEP', '0'))
 
 # Warn immediately.
-warn_seconds = float(os.environ.get('STALEBOT_WARN_SECONDS', '0'))
+warn_seconds = float(os.environ.get('STALEBOT_WARN_ISSUE_SECONDS', '0'))
 
 # Close after a week.
-close_seconds = float(os.environ.get('STALEBOT_CLOSE_SECONDS', '604800'))
+close_seconds = float(os.environ.get('STALEBOT_CLOSE_ISSUE_SECONDS', '604800'))
 
 
 # Copied over from baldrick
@@ -61,9 +61,9 @@ def unwrap(text):
 
 
 ISSUE_CLOSE_WARNING = unwrap("""
-Hi humans :wave: - this issue was labeled as **Close?** approximately
+Hi humans :wave: - this issue was labeled as **{closelabel}** approximately
 {pasttime}. If you think this issue should not be closed, a maintainer should
-remove the **Close?** label - otherwise, I will close this issue in
+remove the **{closelabel}** label - otherwise, I will close this issue in
 {futuretime}.
 
 *If you believe I commented on this issue incorrectly, please report this
@@ -71,14 +71,15 @@ remove the **Close?** label - otherwise, I will close this issue in
 """)
 
 
+# NOTE: This must be in-sync with ISSUE_CLOSE_WARNING
 def is_close_warning(message):
-    return 'Hi humans :wave: - this issue was labeled as **Close?**' in message
+    return f'Hi humans :wave: - this issue was labeled as **{stale_label}**' in message
 
 
 ISSUE_CLOSE_EPILOGUE = unwrap("""
 I'm going to close this issue as per my previous message, but if you feel that
 this issue should stay open, then feel free to re-open and remove the
- **Close?** label.
+ **{closelabel}** label.
 
 *If this is the first time I am commenting on this issue, or if you believe I
 closed this issue incorrectly, please report this
@@ -86,8 +87,9 @@ closed this issue incorrectly, please report this
 """)
 
 
+# NOTE: This must be in-sync with ISSUE_CLOSE_EPILOGUE
 def is_close_epilogue(message):
-    return "I'm going to close this issue as per my previous message" in message  # noqa: E501
+    return "I'm going to close this issue as per my previous message" in message
 
 
 def process_one_issue(issue, now, warn_seconds, close_seconds,
@@ -168,7 +170,7 @@ def process_one_issue(issue, now, warn_seconds, close_seconds,
               'since last warning')
         if not is_dryrun:
             issue.add_to_labels(closed_by_bot_label)
-            issue.create_comment(ISSUE_CLOSE_EPILOGUE)
+            issue.create_comment(ISSUE_CLOSE_EPILOGUE.format(closelabel=stale_label))
             issue.edit(state='closed')
 
     elif time_since_stale_label > warn_seconds:
@@ -176,6 +178,7 @@ def process_one_issue(issue, now, warn_seconds, close_seconds,
             print(f'-> WARNING issue {issue.number}, {time_since_stale_label} seconds since stale')
             if not is_dryrun:
                 issue.create_comment(ISSUE_CLOSE_WARNING.format(
+                    closelabel=stale_label,
                     pasttime=naturaltime(time_since_stale_label),
                     futuretime=naturaldelta(close_seconds)))
         else:
@@ -227,11 +230,10 @@ def process_issues(repository, warn_seconds, close_seconds,
     """
     i = 0
     now = time.time()
-
-    # Get issues labeled as 'Close?'
     g = Github(os.environ.get('GITHUB_TOKEN'))
     repo = g.get_repo(repository)
 
+    # Get issues labeled as stale.
     for issue in repo.get_issues(state='open', labels=[stale_label]):
         if i >= max_issues:
             break
