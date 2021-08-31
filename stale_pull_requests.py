@@ -188,7 +188,9 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
                     issue.create_comment(PULL_REQUESTS_CLOSE_EPILOGUE)
                     pr.edit(state='closed')
             else:
-                print(f'-> OK PR {pr.number} (already warned)')
+                print(f'-> OK PR {pr.number} (already warned), '
+                      f'labeled on {last_labeled}, '
+                      f'last_warn_time_sec={last_warn_time_sec}')
         else:  # Need to warn first
             print(f'-> WARNING PR {pr.number}, labeled on {last_labeled}, '
                   f'last_warn_time_sec={last_warn_time_sec}')
@@ -205,7 +207,8 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
             print(f'-> MARK PR {pr.number} as stale with "{stale_label}" label')
             if not is_dryrun:
                 pr.add_to_labels(stale_label)
-            if time_since_last_warning < 0:  # No warning was ever issued
+            # Warn if no warning exists or last warning made before last commit.
+            if last_warn_time_sec < last_committed_sec:
                 print(f'-> WARNING PR {pr.number}, '
                       f'time_since_last_commit={time_since_last_commit}, '
                       f'time_since_last_warning={time_since_last_warning}')
@@ -215,7 +218,9 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
                         pasttime=naturaldelta(last_committed_sec),
                         futuretime=naturaldelta(close_seconds)))
             else:
-                print(f'-> OK PR {pr.number} (already warned)')
+                print(f'-> OK PR {pr.number} (already warned), '
+                      f'time_since_last_commit={time_since_last_commit}, '
+                      f'time_since_last_warning={time_since_last_warning}')
         else:
             print(f'-> OK PR {pr.number} (not stale), last commit was {last_committed}')
 

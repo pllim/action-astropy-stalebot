@@ -186,7 +186,8 @@ def process_one_issue(issue, now, warn_seconds, close_seconds,
                     pasttime=naturaltime(time_since_stale_label),
                     futuretime=naturaldelta(close_seconds)))
         else:
-            print(f'-> OK issue {issue.number} (already warned)')
+            print(f'-> OK issue {issue.number} (already warned), '
+                  f'{time_since_stale_label} seconds since stale')
 
     else:
         print(f'-> OK issue {issue.number}, time_since_last_warning={time_since_last_warning}, '
