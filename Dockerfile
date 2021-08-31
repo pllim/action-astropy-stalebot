@@ -13,7 +13,7 @@ RUN apt-get update \
     && python3 -m pip install --upgrade setuptools \
     && python3 -m pip install --upgrade wheel \
     && python3 -m pip install humanize \
-    && python3 -m pip install dateutil \
+    && python3 -m pip install python-dateutil \
     && python3 -m pip install PyGithub
 
 # Copies code file action repository to the filesystem path `/` of the container
