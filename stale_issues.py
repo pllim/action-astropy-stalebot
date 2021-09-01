@@ -21,7 +21,11 @@ else:
     # Dummy values for testing only!
     event = {'repository': {'full_name': 'astropy/astropy'}}
 
-reponame = event['repository']['full_name']
+if event_name == 'schedule':
+    reponame = os.environ['GITHUB_REPOSITORY']
+else:
+    reponame = event['repository']['full_name']
+
 is_dryrun = int(os.environ.get('STALEBOT_DRYRUN', '0')) == 1
 stale_label = os.environ.get('STALEBOT_STALE_LABEL', 'Close?')
 keep_open_label = os.environ.get('STALEBOT_KEEP_OPEN_LABEL', 'keep-open')
