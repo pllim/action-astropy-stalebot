@@ -148,13 +148,16 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
 
     # Grab timestamp of warning if it exists.
     time_since_last_warning = -1
+    last_warn_time = None
     last_warn_time_sec = 0
     for comment in pr.get_issue_comments():
         if (comment.user.login not in ('github-actions[bot]', 'astropy-bot[bot]', 'pllim') or
                 not is_close_warning(comment.body)):
             continue
-        cur_labeled_time_sec = dateutil.parser.parse(comment.raw_data['created_at']).timestamp()
+        cur_labeled_time = dateutil.parser.parse(comment.raw_data['created_at'])
+        cur_labeled_time_sec = cur_labeled_time.timestamp()
         if cur_labeled_time_sec > last_warn_time_sec:
+            last_warn_time = cur_labeled_time
             last_warn_time_sec = cur_labeled_time_sec
     if last_warn_time_sec > 0:
         time_since_last_warning = now - last_warn_time_sec
@@ -181,17 +184,23 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
         # did not exist since it's no longer relevant.
         if last_warn_time_sec > labeled_time_sec:
             if time_since_last_warning > close_seconds:
-                print(f'-> CLOSING PR {pr.number}, {time_since_last_warning} seconds '
+                print(f'-> CLOSING PR {pr.number}, {naturaldelta(time_since_last_warning)} '
                       'since last warning')
                 if not is_dryrun:
                     pr.add_to_labels(closed_by_bot_label)
                     issue.create_comment(PULL_REQUESTS_CLOSE_EPILOGUE)
                     pr.edit(state='closed')
             else:
-                print(f'-> OK PR {pr.number} (already warned)')
+                print(f'-> OK PR {pr.number} (already warned), '
+                      f'labeled on {last_labeled}, '
+                      f'warned on {last_warn_time}')
         else:  # Need to warn first
-            print(f'-> WARNING PR {pr.number}, labeled on {last_labeled}, '
-                  f'last_warn_time_sec={last_warn_time_sec}')
+            if time_since_last_warning < 0:
+                print(f'-> WARNING PR {pr.number}, labeled on {last_labeled}, '
+                      'no warning ever issued')
+            else:
+                print(f'-> WARNING PR {pr.number}, labeled on {last_labeled}, '
+                      f'warning issued on {last_warn_time} no longer applicable')
             if not is_dryrun:
                 issue.create_comment(PULL_REQUESTS_CLOSE_WARNING.format(
                     keepopen=keep_open_label,
@@ -202,20 +211,25 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
     else:
         time_since_last_commit = now - last_committed_sec
         if time_since_last_commit > warn_seconds:
-            print(f'-> MARK PR {pr.number} as stale with "{stale_label}" label')
+            print(f'-> MARK PR {pr.number} as stale with "{stale_label}" label, '
+                  f'last commit was {last_committed}')
             if not is_dryrun:
                 pr.add_to_labels(stale_label)
-            if time_since_last_warning < 0:  # No warning was ever issued
-                print(f'-> WARNING PR {pr.number}, '
-                      f'time_since_last_commit={time_since_last_commit}, '
-                      f'time_since_last_warning={time_since_last_warning}')
+            # Warn if no warning exists or last warning made before last commit.
+            if last_warn_time_sec < last_committed_sec:
+                if time_since_last_warning < 0:
+                    print(f'-> WARNING PR {pr.number}, no warning ever issued')
+                else:
+                    print(f'-> WARNING PR {pr.number}, '
+                          f'warning issued on {last_warn_time} no longer applicable')
                 if not is_dryrun:
                     issue.create_comment(PULL_REQUESTS_CLOSE_WARNING.format(
                         keepopen=keep_open_label,
                         pasttime=naturaldelta(last_committed_sec),
                         futuretime=naturaldelta(close_seconds)))
             else:
-                print(f'-> OK PR {pr.number} (already warned)')
+                print(f'-> OK PR {pr.number} (already warned), '
+                      f'{naturaldelta(time_since_last_warning)} since last warning')
         else:
             print(f'-> OK PR {pr.number} (not stale), last commit was {last_committed}')
 

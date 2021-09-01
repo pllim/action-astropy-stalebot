@@ -170,7 +170,7 @@ def process_one_issue(issue, now, warn_seconds, close_seconds,
         # Even if the bot closed this before, if we get to this point, this issue
         # deserves to be closed again with new comment. Maintainer should have used
         # keep_open_label if they do not want this to happen.
-        print(f'-> CLOSING issue {issue.number}, {time_since_last_warning} seconds '
+        print(f'-> CLOSING issue {issue.number}, {naturaldelta(time_since_last_warning)} '
               'since last warning')
         if not is_dryrun:
             issue.add_to_labels(closed_by_bot_label)
@@ -179,18 +179,20 @@ def process_one_issue(issue, now, warn_seconds, close_seconds,
 
     elif time_since_stale_label > warn_seconds:
         if time_since_last_warning < 0:
-            print(f'-> WARNING issue {issue.number}, {time_since_stale_label} seconds since stale')
+            print(f'-> WARNING issue {issue.number}, {naturaldelta(time_since_stale_label)} since stale')
             if not is_dryrun:
                 issue.create_comment(ISSUE_CLOSE_WARNING.format(
                     closelabel=stale_label,
                     pasttime=naturaltime(time_since_stale_label),
                     futuretime=naturaldelta(close_seconds)))
         else:
-            print(f'-> OK issue {issue.number} (already warned)')
+            print(f'-> OK issue {issue.number} (already warned), '
+                  f'{naturaldelta(time_since_stale_label)} since stale')
 
     else:
-        print(f'-> OK issue {issue.number}, time_since_last_warning={time_since_last_warning}, '
-              f'time_since_stale_label={time_since_stale_label}')
+        print(f'-> OK issue {issue.number}, '
+              f'{naturaldelta(time_since_last_warning)} since last warning, '
+              f'{naturaldelta(time_since_stale_label)} since stale')
 
 
 def process_issues(repository, warn_seconds, close_seconds,
