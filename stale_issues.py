@@ -126,7 +126,7 @@ def process_one_issue(issue, now, warn_seconds, close_seconds,
     if keep_open_label in all_issue_labels:
         print(f'Skipping {issue.number} due to "{keep_open_label}" label, '
               f'removing "{stale_label}" label')
-        if not is_dryrun:
+        if not is_dryrun and stale_label in all_issue_labels:
             issue.remove_from_labels(stale_label)
         return
 

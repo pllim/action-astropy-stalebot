@@ -126,7 +126,7 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
     if keep_open_label in all_pr_labels:
         print(f'-> PROTECTED by {keep_open_label}, skipping and '
               f'removing "{stale_label}" label if it exists')
-        if not is_dryrun:
+        if not is_dryrun and stale_label in all_pr_labels:
             pr.remove_from_labels(stale_label)
         return
 
@@ -145,6 +145,8 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
     if last_committed is None:
         print(f'-> LAST COMMIT NOT FOUND, need to debug')
         return
+
+    time_since_last_commit = now - last_committed_sec
 
     # Grab timestamp of warning if it exists.
     time_since_last_warning = -1
@@ -204,12 +206,11 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
             if not is_dryrun:
                 issue.create_comment(PULL_REQUESTS_CLOSE_WARNING.format(
                     keepopen=keep_open_label,
-                    pasttime=naturaldelta(last_committed_sec),
+                    pasttime=naturaldelta(time_since_last_commit),
                     futuretime=naturaldelta(close_seconds)))
 
     # The PR is not yet marked as stale. Mark it as stale as appropriate.
     else:
-        time_since_last_commit = now - last_committed_sec
         if time_since_last_commit > warn_seconds:
             print(f'-> MARK PR {pr.number} as stale with "{stale_label}" label, '
                   f'last commit was {last_committed}')
@@ -225,7 +226,7 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
                 if not is_dryrun:
                     issue.create_comment(PULL_REQUESTS_CLOSE_WARNING.format(
                         keepopen=keep_open_label,
-                        pasttime=naturaldelta(last_committed_sec),
+                        pasttime=naturaldelta(time_since_last_commit),
                         futuretime=naturaldelta(close_seconds)))
             else:
                 print(f'-> OK PR {pr.number} (already warned), '
