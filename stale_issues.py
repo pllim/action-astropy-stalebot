@@ -249,7 +249,6 @@ def process_issues(repository, warn_seconds, close_seconds,
                               closed_by_bot_label=closed_by_bot_label, is_dryrun=is_dryrun)
         except Exception as e:
             print(f'-> ERROR: {repr(e)}')
-            pass
         i += 1
         if not is_dryrun and sleep > 0:
             time.sleep(sleep)
