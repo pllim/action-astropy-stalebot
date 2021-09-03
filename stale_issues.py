@@ -243,9 +243,13 @@ def process_issues(repository, warn_seconds, close_seconds,
     for issue in repo.get_issues(state='open', labels=[stale_label]):
         if max_issues >= 0 and i >= max_issues:
             break
-        process_one_issue(issue, now, warn_seconds, close_seconds,
-                          stale_label=stale_label, keep_open_label=keep_open_label,
-                          closed_by_bot_label=closed_by_bot_label, is_dryrun=is_dryrun)
+        try:
+            process_one_issue(issue, now, warn_seconds, close_seconds,
+                              stale_label=stale_label, keep_open_label=keep_open_label,
+                              closed_by_bot_label=closed_by_bot_label, is_dryrun=is_dryrun)
+        except Exception as e:
+            print(f'-> ERROR: {repr(e)}')
+            pass
         i += 1
         if not is_dryrun and sleep > 0:
             time.sleep(sleep)
