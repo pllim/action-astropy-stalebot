@@ -165,7 +165,7 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
         time_since_last_warning = now - last_warn_time_sec
 
     # We check for staleness and handle that first. This can be from bot or human.
-    if stale_label in all_pr_labels:       
+    if stale_label in all_pr_labels:
         # Find when the label was added. Only count the most recent event.
         last_labeled = None
         labeled_time_sec = 0
