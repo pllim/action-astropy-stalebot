@@ -165,10 +165,11 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
         time_since_last_warning = now - last_warn_time_sec
 
     # We check for staleness and handle that first. This can be from bot or human.
-    if stale_label in all_pr_labels:
+    if stale_label in all_pr_labels:       
         # Find when the label was added. Only count the most recent event.
         last_labeled = None
         labeled_time_sec = 0
+        labeled_by = ''
         for timeline in issue.get_timeline():
             if timeline.event != 'labeled' or timeline.raw_data['label']['name'] != stale_label:
                 continue
@@ -177,9 +178,15 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
             if cur_labeled_time_sec > labeled_time_sec:
                 last_labeled = cur_created_at
                 labeled_time_sec = cur_labeled_time_sec
+                labeled_by = timeline.actor.login
 
         if last_labeled is None:
             print(f'-> {stale_label} exists but cannot find when it was added, need to debug')
+            return
+
+        if labeled_by == 'github-actions[bot]' and time_since_last_commit <= warn_seconds:
+            print(f'-> OK PR {pr.number} (not stale but has "{stale_label}" applied by bot, '
+                  f'someone force pushed), last commit was {last_committed}')
             return
 
         # Note: If warning time is before label time, it's as if the warning
