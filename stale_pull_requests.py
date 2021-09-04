@@ -184,7 +184,7 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
 
         # Note: If warning time is before label time, it's as if the warning
         # did not exist since it's no longer relevant.
-        if last_warn_time_sec > labeled_time_sec:
+        if last_warn_time_sec >= labeled_time_sec:
             if time_since_last_warning > close_seconds:
                 print(f'-> CLOSING PR {pr.number}, {naturaldelta(time_since_last_warning)} '
                       'since last warning')
