@@ -240,7 +240,7 @@ def process_issues(repository, warn_seconds, close_seconds,
     repo = g.get_repo(repository)
 
     # Get issues labeled as stale.
-    for issue in repo.get_issues(state='open', labels=[stale_label]):
+    for issue in repo.get_issues(state='open', labels=[stale_label], sort='created', direction='asc'):
         if max_issues >= 0 and i >= max_issues:
             break
         try:
