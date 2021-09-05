@@ -287,7 +287,7 @@ def process_pull_requests(repository, warn_seconds, close_seconds,
     g = Github(os.environ.get('GITHUB_TOKEN'))
     repo = g.get_repo(repository)
 
-    for pr in repo.get_pulls(state='open'):
+    for pr in repo.get_pulls(state='open', sort='created', direction='asc'):
         if max_prs >= 0 and i >= max_prs:
             break
         try:
