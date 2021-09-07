@@ -184,8 +184,8 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
             print(f'-> {stale_label} exists but cannot find when it was added, need to debug')
             return
 
-        if labeled_by == 'github-actions[bot]' and time_since_last_commit <= warn_seconds:
-            print(f'-> OK PR {pr.number} (not stale but has "{stale_label}" applied by bot, '
+        if time_since_last_commit <= warn_seconds:
+            print(f'-> OK PR {pr.number} (not stale but has "{stale_label}" applied by {labeled_by}, '
                   f'someone force pushed), last commit was {last_committed}')
             return
 
