@@ -5,7 +5,7 @@ import time
 
 import dateutil.parser
 from github import Github
-from humanize import naturaldelta
+from humanize import naturaldelta, naturaltime
 
 # This workflow only makes sense in these events.
 event_name = os.environ.get('GITHUB_EVENT_NAME', 'unknown')
@@ -186,7 +186,8 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
 
         if time_since_last_commit <= warn_seconds:
             print(f'-> OK PR {pr.number} (not stale but has "{stale_label}" applied by {labeled_by}, '
-                  f'someone force pushed), last commit was {last_committed}')
+                  f'someone force pushed), last commit was {last_committed} '
+                  f'({naturaltime(time_since_last_commit)})')
             return
 
         # Note: If warning time is before label time, it's as if the warning
@@ -239,7 +240,8 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
                 print(f'-> OK PR {pr.number} (already warned), '
                       f'{naturaldelta(time_since_last_warning)} since last warning')
         else:
-            print(f'-> OK PR {pr.number} (not stale), last commit was {last_committed}')
+            print(f'-> OK PR {pr.number} (not stale), last commit was {last_committed} '
+                  f'({naturaltime(time_since_last_commit)})')
 
 
 def process_pull_requests(repository, warn_seconds, close_seconds,
