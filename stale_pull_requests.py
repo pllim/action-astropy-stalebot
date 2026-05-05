@@ -4,7 +4,7 @@ import sys
 import time
 
 import dateutil.parser
-from github import Github
+from github import Auth, Github
 from humanize import naturaldelta, naturaltime
 
 # This workflow only makes sense in these events.
@@ -286,7 +286,8 @@ def process_pull_requests(repository, warn_seconds, close_seconds,
     """
     i = 0
     now = time.time()
-    g = Github(os.environ.get('GITHUB_TOKEN'))
+    auth = Auth.Token(os.environ.get('GITHUB_TOKEN'))
+    g = Github(auth=auth)
     repo = g.get_repo(repository)
 
     for pr in repo.get_pulls(state='open', sort='created', direction='asc'):
