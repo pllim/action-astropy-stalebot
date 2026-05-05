@@ -4,7 +4,7 @@ import sys
 import time
 
 import dateutil.parser
-from github import Github
+from github import Auth, Github
 from humanize import naturaltime, naturaldelta
 
 # This workflow only makes sense in these events.
@@ -236,7 +236,8 @@ def process_issues(repository, warn_seconds, close_seconds,
     """
     i = 0
     now = time.time()
-    g = Github(os.environ.get('GITHUB_TOKEN'))
+    auth = Auth.Token(os.environ["GITHUB_TOKEN"])
+    g = Github(auth=auth)
     repo = g.get_repo(repository)
 
     # Get issues labeled as stale.
