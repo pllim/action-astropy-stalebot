@@ -1,6 +1,6 @@
 #!/bin/bash -l
 
-PYTHON=$(which python3.8)
+PYTHON=$(which python3.10)
 echo "PYTHON=${PYTHON}"
 
 $PYTHON /stale_pull_requests.py
