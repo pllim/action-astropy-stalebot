@@ -123,7 +123,7 @@ def process_one_issue(issue, now, warn_seconds, close_seconds,
         print(f'Skipping {issue.number}, {stale_label} not found in {all_issue_labels}')
         return
 
-    if keep_open_label in all_issue_labels:
+    if keep_open_label and keep_open_label in all_issue_labels:
         print(f'Skipping {issue.number} due to "{keep_open_label}" label, '
               f'removing "{stale_label}" label')
         if not is_dryrun and stale_label in all_issue_labels:
