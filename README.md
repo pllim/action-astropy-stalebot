@@ -38,3 +38,10 @@ Options that are configurable via `env`:
 | `STALEBOT_CLOSE_ISSUE_SECONDS` | 604800 | How long to wait after issue is stale before closing it. |
 | `STALEBOT_WARN_PR_SECONDS` | 12960000 | How long to wait before issuing warning after the last commit in a PR. This is ignored if PR is marked as stale manually. |
 | `STALEBOT_CLOSE_PR_SECONDS` | 2592000 | How long to wait after PR is stale before closing it. |
+
+## History
+
+This check was originally part of [Baldrick bot](https://github.com/OpenAstronomy/baldrick), used under the terms of the MIT License, contributed by Stuart Mumford (https://github.com/Cadair)
+for SunPy and Astropy. For reasons now forgotten, the check stopped working for Astropy,
+so this standalone workflow was created as a "temporarily workaround" until it could be fixed.
+It was never fixed and has since been removed from Baldrick.
