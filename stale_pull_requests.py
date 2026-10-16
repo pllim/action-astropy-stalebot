@@ -64,7 +64,7 @@ def unwrap(text):
     return (2 * os.linesep).join(paragraphs)
 
 
-PULL_REQUESTS_CLOSE_WARNING = unwrap("""
+PULL_REQUESTS_CLOSE_WARNING_WITH_KEEPOPEN = unwrap("""
 Hi humans :wave: - this pull request hasn't had any new commits for
 approximately {pasttime}. **I plan to close this in {futuretime} if the pull
 request doesn't have any new commits by then.**
@@ -73,6 +73,21 @@ In lieu of a stalled pull request, please consider closing this and open an
 issue instead if a reminder is needed to revisit in the future. Maintainers
 may also choose to add **{keepopen}** label to keep this PR open but it is
 discouraged unless absolutely necessary.
+
+If this PR still needs to be reviewed, as an author, you can rebase it
+to reset the clock.
+
+*If you believe I commented on this pull request incorrectly, please report
+this [here](https://github.com/pllim/action-astropy-stalebot/issues).*
+""")
+
+PULL_REQUESTS_CLOSE_WARNING_NO_KEEPOPEN = unwrap("""
+Hi humans :wave: - this pull request hasn't had any new commits for
+approximately {pasttime}. **I plan to close this in {futuretime} if the pull
+request doesn't have any new commits by then.**
+
+In lieu of a stalled pull request, please consider closing this and open an
+issue instead if a reminder is needed to revisit in the future.
 
 If this PR still needs to be reviewed, as an author, you can rebase it
 to reset the clock.
@@ -123,7 +138,7 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
     all_pr_labels = [lbl.name for lbl in pr.labels]
     print(f'Checking {pr.number} with labels {all_pr_labels}')
 
-    if keep_open_label in all_pr_labels:
+    if keep_open_label and keep_open_label in all_pr_labels:
         print(f'-> PROTECTED by {keep_open_label}, skipping and '
               f'removing "{stale_label}" label if it exists')
         if not is_dryrun and stale_label in all_pr_labels:
@@ -212,10 +227,15 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
                 print(f'-> WARNING PR {pr.number}, labeled on {last_labeled}, '
                       f'warning issued on {last_warn_time} no longer applicable')
             if not is_dryrun:
-                issue.create_comment(PULL_REQUESTS_CLOSE_WARNING.format(
-                    keepopen=keep_open_label,
-                    pasttime=naturaldelta(time_since_last_commit),
-                    futuretime=naturaldelta(close_seconds)))
+                if keep_open_label:
+                    issue.create_comment(PULL_REQUESTS_CLOSE_WARNING_WITH_KEEPOPEN.format(
+                        keepopen=keep_open_label,
+                        pasttime=naturaldelta(time_since_last_commit),
+                        futuretime=naturaldelta(close_seconds)))
+                else:
+                    issue.create_comment(PULL_REQUESTS_CLOSE_WARNING_NO_KEEPOPEN.format(
+                        pasttime=naturaldelta(time_since_last_commit),
+                        futuretime=naturaldelta(close_seconds)))
 
     # The PR is not yet marked as stale. Mark it as stale as appropriate.
     else:
@@ -232,10 +252,15 @@ def process_one_pr(pr, now, warn_seconds, close_seconds,
                     print(f'-> WARNING PR {pr.number}, '
                           f'warning issued on {last_warn_time} no longer applicable')
                 if not is_dryrun:
-                    issue.create_comment(PULL_REQUESTS_CLOSE_WARNING.format(
-                        keepopen=keep_open_label,
-                        pasttime=naturaldelta(time_since_last_commit),
-                        futuretime=naturaldelta(close_seconds)))
+                    if keep_open_label:
+                        issue.create_comment(PULL_REQUESTS_CLOSE_WARNING_WITH_KEEPOPEN.format(
+                            keepopen=keep_open_label,
+                            pasttime=naturaldelta(time_since_last_commit),
+                            futuretime=naturaldelta(close_seconds)))
+                    else:
+                        issue.create_comment(PULL_REQUESTS_CLOSE_WARNING_NO_KEEPOPEN.format(
+                            pasttime=naturaldelta(time_since_last_commit),
+                            futuretime=naturaldelta(close_seconds)))
             else:
                 print(f'-> OK PR {pr.number} (already warned), '
                       f'{naturaldelta(time_since_last_warning)} since last warning')
